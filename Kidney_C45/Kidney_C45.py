@@ -33,23 +33,34 @@ data = data.loc[:, :'class']
 # we have to substitute the strings by numbers
 # normal/notpresent/no/poor/notckd => 0
 # abnormal/present/yes/good/ckd => 1
-to_replace = ['yes', 'no', 'present', 'notpresent', 'abnormal', 'normal', 'good', 'poor', '\tyes', '\tno',
-              'ckd', 'notckd']
-value = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+to_replace = ['yes', 'no', 'present', 'notpresent', 'abnormal', 'normal', 'good', 'poor', '\tyes', '\tno']
+value = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
 data = data.replace(to_replace, value)
 
 # First approach: drop NaN
 data_drop = data.dropna()
 
-# Decision Tree
 clf = DecisionTreeClassifier('entropy')
 
 domain_drop = data_drop.loc[:, :'anemia']
 target_drop = data_drop.loc[:, 'class']
-target_drop = target_drop.astype('int')
+# target_drop = target_drop.astype('int')
 clf_tree_drop = clf.fit(domain_drop, target_drop)
-class_names = ['notckd', 'ckd']
+class_names_drop = ['notckd', 'ckd']
 dot_data_drop = export_graphviz(clf_tree_drop, out_file="Output\Tree_drop3.dot", feature_names=features[0:24],
                                 class_names=True, filled=True, rounded=True, special_characters=True)
 
 make_png('Output\Tree_drop3.dot', 'output\Tree_drop3.png')
+
+# Second approach: treat NaN as another possible value
+data_replace = data.fillna(-1)
+data_replace['class'].replace(['ckd\t', 0], ['ckd', 'unknown'], inplace=True)
+
+domain_replace = data_replace.loc[:, :'anemia']
+target_replace = data_replace.loc[:, 'class']
+clf_tree_replace = clf.fit(domain_replace, target_replace)
+class_names_replace = ['notckd', 'ckd', 'unknown']
+dot_data_replace = export_graphviz(clf_tree_replace, out_file="Output\Tree_replace.dot", feature_names=features[0:24],
+                                   class_names=True, filled=True, rounded=True, special_characters=True)
+
+make_png('Output\Tree_replace.dot', 'output\Tree_replace.png')
