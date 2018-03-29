@@ -31,10 +31,11 @@ data = data.loc[:, :'class']
 
 # the DecisionTreeRegressor works only with numerical features
 # we have to substitute the strings by numbers
-# normal/notpresent/no/poor => 0
-# abnormal/present/yes/good => 1
-to_replace = ['yes', 'no', 'present', 'notpresent', 'abnormal', 'normal', 'good', 'poor', '\tyes', '\tno']
-value = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+# normal/notpresent/no/poor/notckd => 0
+# abnormal/present/yes/good/ckd => 1
+to_replace = ['yes', 'no', 'present', 'notpresent', 'abnormal', 'normal', 'good', 'poor', '\tyes', '\tno',
+              'ckd', 'notckd']
+value = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
 data = data.replace(to_replace, value)
 
 # First approach: drop NaN
@@ -45,8 +46,11 @@ clf = DecisionTreeClassifier('entropy')
 
 domain_drop = data_drop.loc[:, :'anemia']
 target_drop = data_drop.loc[:, 'class']
+print(target_drop.values)
 clf_tree_drop = clf.fit(domain_drop, target_drop)
-class_names = ['ckd', 'notckd']
-dot_data_drop = export_graphviz(clf_tree_drop, out_file="Output\Tree_drop.dot", feature_names=features[0:24],
-                                class_names=class_names, filled=True, rounded=True, special_characters=True)
-make_png('Output\Tree_drop2.dot', 'output\Tree_drop.png')
+# class_names = ['ckd', 'notckd']
+# dot_data_drop = export_graphviz(clf_tree_drop, out_file="Output\Tree_drop.dot", feature_names=features[0:24],
+#                                 class_names=class_names, filled=True, rounded=True, special_characters=True)
+dot_data_drop = export_graphviz(clf_tree_drop, out_file="Output\Tree_drop3.dot", feature_names=features[0:24],
+                                filled=True, rounded=True, special_characters=True)
+make_png('Output\Tree_drop3.dot', 'output\Tree_drop3.png')
